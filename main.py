@@ -5,38 +5,61 @@ import urllib.request
 from discord.ext import commands
 from Map_Functions import *
 
-
 # Defines Bot, Bot prefix, bot description, and the server
-bot = commands.Bot(command_prefix = '!', description = 'Deliverer of Freedom and Democracy. Also serving discord channels near you!')
+bot = commands.Bot(command_prefix = '.', description = 'Deliverer of Freedom and Democracy. Also serving discord channels near you!')
 user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
+path_quotes = 'C:\\Users\\Challice\\Documents\\Liberty-Prime-bot\\quotes\\'
+deagles_server_id = '517471244623544341'
+general_channel_id = '517471244623544343'
+welcome_channel_id = '546434534791446528'
+rules_channel_id = '546434619365654528'
+bot_chat_channel_id = '568897911195303976'
+general_voice_channel_id = '517471244623544345'
 
 @bot.event
 async def on_ready():
     """Add a gamme, load opus, and say that Liberty Prime is online once the bot is ready."""
     discord.opus.load_opus('libopus-0.x64.dll')
     await bot.change_presence(game=discord.Game(name='Testing'))
-    await bot.send_message(bot.get_channel('335560493454327808'),
-                           'Liberty Prime is online. All systems nominal. Weapons hot. Mission: the destruction of any and all Chinese communists')
+    # await bot.send_message(bot.get_channel(general_channel_id),
+    #                       'Liberty Prime is online. All systems nominal. Weapons hot. Mission: the destruction of any and all Chinese communists')
 
 @bot.event
 async def on_error():
     """Send the error message to #bot-chat. Not working currently."""
-    await bot.send_message(bot.get_channel('336262010033405952'), sys.exc_info())
+    await bot.send_message(bot.get_channel(bot_chat_channel_id), sys.exc_info())
+
+@bot.event
+async def on_message(message):
+    author = message.author
+    channel = message.channel
+    content = message.content.lower()
+
+    if author != 'Liberty Prime Bot#3840':
+        if 'real communism has never been tried' in content:
+            await bot.send_message(channel, 'COMMUNISM HAS BEEN TRIED. COMMUNISM IS THE VERY DEFINITION OF FAILURE.')
+        elif 'communism' in content:
+            await bot.send_message(channel, 'DEATH IS A PREFERABLE ALTERNATIVE TO COMMUNISM.')
+            await bot.send_message(channel, author != 'Liberty Prime Bot#3840')
+            await bot.send_message(channel, author)
+            await bot.send_message(channel, 'IS NOT')
+            await bot.send_message(channel, 'Liberty Prime Bot#3840')
+    
+    await bot.process_commands(message)
 
 @bot.event
 async def on_member_join(member):
     """Great a new member when they join."""
-    general = bot.get_channel('335560493454327808')
-    welcome = bot.get_channel('341749474164473856')
-    rules = bot.get_channel('341749548110053377')
-    await bot.send_message(general, 'Welcome ' + member.mention+', please read ' + welcome.mention +
+    general = bot.get_channel(general_channel_id)
+    welcome = bot.get_channel(welcome_channel_id)
+    rules = bot.get_channel(rules_channel_id)
+    await bot.send_message(general, 'Welcome ' + member.mention + ', please read ' + welcome.mention +
                            ' and the pinned message in ' + rules.mention)
 
 @bot.event
 async def on_member_remove(member):
     """Say who left when someone leaves the server."""
-    await bot.send_message(bot.get_channel('335560493454327808'), 'Bye bye, ' + str(member))
-
+    await bot.send_message(bot.get_channel(general_channel_id), 'Bye bye, ' + str(member))
 
 @bot.command()
 async def hello():
@@ -55,31 +78,32 @@ async def freedom(ctx):
     """Do any number of @mentions after the command to send those people some freedom."""
     recipients = ctx.message.mentions
     for recipient in recipients:
-        await bot.say('\U0001F4A5'+' '+'\U0001F1FA'+'\U0001F1F8'+' '+recipient.mention+
+        await bot.say('\U0001F4A5'+' '+'\U0001F1FA'+'\U0001F1F8'+' '+ recipient.mention +
                       ', HAVE SOME FREEDOM, COMMUNIST SCUM! '+'\U0001F1FA'+'\U0001F1F8'+' '+'\U0001F4A5')
 
 @bot.command(pass_context = True)
 async def prime(ctx):
     """Liberty Prime says a quote in a text channel, and if in one, in a voice channel."""
     quotes = []
-    with open('C:\\Users\\Brandon\\Desktop\\Python\\discord bots\\quotes\\quotes.txt', 'r') as quotefile:
+    with open('C:\\Users\\Challice\\Documents\\Liberty-Prime-bot\\quotes.txt', 'r') as quotefile:
         for line in quotefile:
             quotes.append(line.strip())
     number = randint(0, len(quotes)-1)
     await bot.say(quotes[number])
-    if bot.is_voice_connected(bot.get_server('335560493454327808')):
+    if bot.is_voice_connected(bot.get_server(deagles_server_id)):
         for x in bot.voice_clients:
             if x.server == ctx.message.server:
                 voice = x
-        player = voice.create_ffmpeg_player('C:\\Users\\Brandon\\Desktop\\Python\\discord bots\\quotes\\quote #{}.wav').format(str(number+1))
+        wav_file = 'C:\\Users\\Challice\\Documents\\Liberty-Prime-bot\\quotes\\quote #{}.wav'.format(str(number+1))
+        player = voice.create_ffmpeg_player(wav_file)
         player.start()
 
 @bot.command()
 async def join():
     """Makes Liberty Prime join the voice channel."""
-    if not bot.is_voice_connected(bot.get_server('335560493454327808')):
-        voice = await bot.join_voice_channel(bot.get_channel('335560493458522112'))
-        player = voice.create_ffmpeg_player('C:\\Users\\Brandon\\Desktop\\Python\\discord bots\\quotes\\join.wav')
+    if not bot.is_voice_connected(bot.get_server(deagles_server_id)):
+        voice = await bot.join_voice_channel(bot.get_channel(general_voice_channel_id))
+        player = voice.create_ffmpeg_player('C:\\Users\\Challice\\Documents\\Liberty-Prime-bot\\quotes\\join.wav')
         player.start()
     else:
         await bot.say('I am already in a voice channel.')
@@ -87,7 +111,7 @@ async def join():
 @bot.command(pass_context = True)
 async def leave(ctx):
     """Makes Liberty Prime leave the voice channel."""
-    if bot.is_voice_connected(bot.get_server('335560493454327808')):
+    if bot.is_voice_connected(bot.get_server(deagles_server_id)):
         for x in bot.voice_clients:
             if x.server == ctx.message.server:
                 return await x.disconnect()
@@ -98,7 +122,7 @@ async def leave(ctx):
 @bot.command(pass_context = True)
 async def addrole(ctx):
     """Adds the roles you list after the command."""
-    server = bot.get_server('335560493454327808')
+    server = bot.get_server(deagles_server_id)
     possible_roles = []
     for role in server.roles:
         if role.name not in ['Peasants', 'Mod', 'Tinkerer', 'Bot']:
@@ -123,7 +147,7 @@ async def addrole(ctx):
 @bot.command(pass_context = True)
 async def removerole(ctx):
     """Removes the roles you list after the command."""
-    server = bot.get_server('335560493454327808')
+    server = bot.get_server(deagles_server_id)
     possible_roles = []
     for role in server.roles:
         if role.name not in ['Peasants', 'Mod', 'Tinkerer', 'Bot']:
@@ -149,41 +173,6 @@ async def removerole(ctx):
 async def purge(ctx):
     """Purge a certain number of posts, or posts by one author. WIP"""
     await bot.say('Coming soon')
-
-@bot.command(pass_context = True)
-async def roll(ctx):
-    """After the command type ydx+ydx+ydx... where y is the number of dice, and x is the dice size (1,2,4,6,8,10,12,20,100 are valid)."""
-    try:
-        valid_dice = ['d1', 'd2', 'd4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100']
-        dice_input = ctx.message.content.split('!roll ')[1]
-        dice_input = dice_input.split('+')
-        die = [dice.strip() for dice in dice_input]
-        result = 0
-        for dice in die:
-            for word in valid_dice:
-                if word in ctx.message.content:
-                    num_dice = dice.split('d')[0]
-                    size_die = dice.split('d')[1]
-            try:
-                num_dice = int(num_dice)
-                size_die = int(size_die)
-            except:
-                await bot.say('Problem with the input, please try again.')
-            for n in range(num_dice):
-                result += randint(1, size_die)
-        await bot.say(result)
-    except:
-        await bot.say('error')
-
-@bot.command()
-async def flipcoin():
-    """Returns either \"heads\" or \"tails\"."""
-    result = randint(0, 1)
-    if result == 0:
-        result = 'Heads'
-    elif result == 1:
-        result = 'Tails'
-    await bot.say(result)
 
 @bot.command(pass_context = True)
 async def poll(ctx):
@@ -315,7 +304,7 @@ async def create(ctx):
 async def shutdown(ctx):
     """The command to terminate the bot, only usable by Ghostowl657."""
     if ctx.message.author.id == '196866248984887296':
-        await bot.send_message(bot.get_channel('335560493454327808'), 'Initiate shutdown protocal')
+        await bot.send_message(bot.get_channel(general_channel_id), 'Initiate shutdown protocal')
         await bot.close()
     else:
         hacker = ctx.message.author
@@ -323,5 +312,4 @@ async def shutdown(ctx):
         await bot.say('\U0001F4A5'+' '+'\U0001F1FA'+'\U0001F1F8'+' '+hacker.mention+
                       ', HAVE SOME FREEDOM, COMMUNIST SCUM! '+'\U0001F1FA'+'\U0001F1F8'+' '+'\U0001F4A5')
 
-
-bot.run()
+bot.run('NTY4ODg2Nzk1MDAyMDUyNjE1.XLon0w.PIJlWT5ji5CexwTdbgLp6Q3W72E')

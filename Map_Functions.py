@@ -1,6 +1,5 @@
 from PIL import Image
 
-
 class Country:
     def __init__(self, name, color=(0,0,0), isVassal = False):
         self.name = name
